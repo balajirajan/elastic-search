@@ -1,7 +1,3 @@
-elastic-search
-==============
-
- 
 
 elastic-search with kafka-river plugin:
 =======================================
