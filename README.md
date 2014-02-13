@@ -1,4 +1,107 @@
-elastic-searchc
-===============
+elastic-search
+==============
 
-elastic-search with kafka-river plugin
+ 
+
+elastic-search with kafka-river plugin:
+=======================================
+
+Install  prerequisites below:
+
+ 1. Open JDK
+ 2. Maven
+ 3. Kafka
+ 4. curl
+ 5. Git
+
+Download and install elasticsearch:
+===================================
+
+wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.0.zip
+
+unzip elasticsearch-1.0.0.zip 
+
+mv elasticsearch-1.0.0 elasticsearch
+
+mv elasticsearch /etc/
+
+
+Install Plugins if required.
+
+cd /etc/elasticsearch/
+
+cd bin/
+
+./plugin -install mobz/elasticsearch-head
+
+./plugin -install karmi/elasticsearch-paramedic
+
+
+Install elastic-search wrapper to restart elastic search service.
+  
+cd /opt/
+
+curl -L http://github.com/elasticsearch/elasticsearch-servicewrapper/tarball/master | tar -xvzf
+
+mv *servicewrapper*/service /etc/elasticsearch/bin/
+
+/etc/elasticsearch/bin/service/elasticsearch install
+
+sudo /sbin/chkconfig elasticsearch on
+
+sudo /sbin/chkconfig elasticsearch --list
+
+service elasticsearch restart
+
+Install Kafka-River plugin for elastic-search, to index huge messages into elasticsearch:
+=========================================================================================
+
+1. Install kafka
+
+git clone https://github.com/apache/kafka
+
+cd kafka
+
+git checkout <version>, in my case I used "git checkout 0.7.2"
+
+./sbt update
+
+./sbt package
+
+
+2. Install Maven
+
+wget http://www.mirrorservice.org/sites/ftp.apache.org/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz
+
+sudo tar xzf apache-maven-3.0.5-bin.tar.gz -C /usr/local
+
+cd /usr/local/
+
+ln -s apache-maven-3.0.5 maven
+
+vi /etc/profile.d/maven.sh
+
+// add the system wide variable for maven path  
+    export M2_HOME=/usr/local/maven 
+    export PATH=${M2_HOME}/bin:${PATH}
+
+mvn -version
+
+
+3. Install kafka in maven repo
+
+mvn install:install-file -Dfile=./core/target/scala_2.8.0/kafka-0.7.2.jar -DgroupId=org.apache.kafka -DartifactId=kafka -Dversion=0.7.2 -Dpackaging=jar
+
+
+4. Buid the kafka -river plugin in elasticsearch:
+
+mvn compile test package 
+
+PLUGIN_PATH=/<PWD>/target/releases/elasticsearch-river-kafka-1.0.1-SNAPSHOT.zip
+
+
+5. Install Plugin:
+
+cd $ELASTICSEARCH_HOME
+
+./bin/plugin -url file:/$PLUGIN_PATH -install elasticsearch-river-kafka
